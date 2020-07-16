@@ -34,9 +34,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake")
 if(NOT BUILD_NUMBER)
     set(BUILD_NUMBER 0)
 endif()
-set(RPI_VISION_VERSION 0.1.${BUILD_NUMBER})
-
-project(rpi-vision VERSION "${RPI_VISION_VERSION}" LANGUAGES CXX C)
+project(rpi-vision VERSION 0.1.${BUILD_NUMBER} LANGUAGES CXX C)
 
 include(options)
 include(deps)

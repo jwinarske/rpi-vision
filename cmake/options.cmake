@@ -22,27 +22,74 @@
 # SOFTWARE.
 #
 
-set(OPENCV_GIT_TAG 4.3.0)
+if(NOT OPENCV_GIT_TAG)
+    set(OPENCV_GIT_TAG 4.3.0)
+endif()
 
-set(OPENVX_IMPL_GIT_TAG openvx_1.3)
+if(NOT OPENVX_IMPL_GIT_TAG)
+    set(OPENVX_IMPL_GIT_TAG openvx_1.3)
+endif()
 
-set(OPENVX_SAMPLES_GIT_TAG master)
+if(NOT OPENVX_SAMPLES_GIT_TAG)
+    set(OPENVX_SAMPLES_GIT_TAG master)
+endif()
 
 # Applies to GCC ARM, or when using a Generic Triple with Clang
 option(BUILD_OPENCV_WITH_CPU_VFPV3 "Builds OpenCV with -mfpu=vfpv3" OFF)
 option(BUILD_OPENCV_WITH_CPU_NEON "Builds OpenCV with -mfpu=neon" OFF)
 
-# enable if dependent packages are present in your sysroot
-option(BUILD_OPENCV_WITH_GTK "Builds OpenCV with GTK support" ON)
+option(BUILD_OPENCV_WITH_NONFREE "Builds OpenCV with Non-Free" ON)
+option(BUILD_OPENCV_WITH_VULKAN "Builds OpenCV with Vulkan Support" OFF) # enable if using rpi-vk-driver
 
-# enable if using rpi-vk-driver
-option(BUILD_OPENCV_WITH_VULKAN "Builds OpenCV with Vulkan Support" OFF)
+option(BUILD_OPENCV_WITH_TESTS "Builds OpenCV with Tests" OFF)
+option(BUILD_OPENCV_WITH_EXAMPLES "Builds OpenCV with Examples" OFF)
+option(BUILD_OPENCV_WITH_PYTHON_EXAMPLES "Install Python Examples with OpenCV build" OFF)
+
+if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "arm")
+    SET(OPENVX_EXPERIMENTAL_USE_VENUM ON)
+endif()
 
 if(CMAKE_CROSSCOMPILING)
     set(CMAKE_STAGING_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/staging${CMAKE_INSTALL_PREFIX})
+else()
+    set(CMAKE_STAGING_PREFIX ${CMAKE_INSTALL_PREFIX})
+    SET(ENV{PKG_CONFIG_PATH} /usr/lib/arm-linux-gnueabihf/pkgconfig:/usr/share/pkgconfig)
 endif()
 
-message(STATUS "Generator .............. ${CMAKE_GENERATOR}")
-message(STATUS "Build Type ............. ${CMAKE_BUILD_TYPE}")
-message(STATUS "Install Prefix ......... ${CMAKE_INSTALL_PREFIX}")
-message(STATUS "Staging Prefix ......... ${CMAKE_STAGING_PREFIX}")
+set(EXT_CMAKE_STAGING_PREFIX ${CMAKE_BINARY_DIR}/staging_ext${CMAKE_INSTALL_PREFIX})
+
+message(STATUS "")
+message(STATUS "*************************************")
+message(STATUS "* OPTIONS                           *")
+message(STATUS "*************************************")
+message(STATUS "")
+message(STATUS "Enviromental Variables")
+message(STATUS "")
+message(STATUS "MACHINE ............................. $ENV{MACHINE}")
+message(STATUS "LLVM_ROOT ........................... $ENV{LLVM_ROOT}")
+message(STATUS "TARGET_SYSROOT ...................... $ENV{TARGET_SYSROOT}")
+message(STATUS "PKG_CONFIG_PATH ..................... $ENV{PKG_CONFIG_PATH}")
+message(STATUS "")
+message(STATUS "CMake Variables")
+message(STATUS "")
+message(STATUS "CMAKE_CROSSCOMPILING ................ ${CMAKE_CROSSCOMPILING}")
+message(STATUS "CMAKE_GENERATOR ..................... ${CMAKE_GENERATOR}")
+message(STATUS "CMAKE_BUILD_TYPE .................... ${CMAKE_BUILD_TYPE}")
+message(STATUS "CMAKE_INSTALL_PREFIX ................ ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "CMAKE_STAGING_PREFIX ................ ${CMAKE_STAGING_PREFIX}")
+message(STATUS "EXT_CMAKE_STAGING_PREFIX ............ ${EXT_CMAKE_STAGING_PREFIX}")
+message(STATUS "")
+message(STATUS "OPENCV_GIT_TAG ...................... ${OPENCV_GIT_TAG}")
+message(STATUS "OPENVX_IMPL_GIT_TAG ................. ${OPENVX_IMPL_GIT_TAG}")
+message(STATUS "OPENVX_SAMPLES_GIT_TAG .............. ${OPENVX_SAMPLES_GIT_TAG}")
+message(STATUS "")
+message(STATUS "BUILD_OPENCV_WITH_CPU_VFPV3 ......... ${BUILD_OPENCV_WITH_CPU_VFPV3}")
+message(STATUS "BUILD_OPENCV_WITH_CPU_NEON .......... ${BUILD_OPENCV_WITH_CPU_NEON}")
+message(STATUS "BUILD_OPENCV_WITH_NONFREE ........... ${BUILD_OPENCV_WITH_VULKAN}")
+message(STATUS "BUILD_OPENCV_WITH_VULKAN ............ ${BUILD_OPENCV_WITH_VULKAN}")
+message(STATUS "BUILD_OPENCV_WITH_TESTS ............. ${BUILD_OPENCV_WITH_TESTS}")
+message(STATUS "BUILD_OPENCV_WITH_EXAMPLES .......... ${BUILD_OPENCV_WITH_EXAMPLES}")
+message(STATUS "BUILD_OPENCV_WITH_PYTHON_EXAMPLES ... ${BUILD_OPENCV_WITH_PYTHON_EXAMPLES}")
+message(STATUS "")
+message(STATUS "OPENVX_EXPERIMENTAL_USE_VENUM ....... ${OPENVX_EXPERIMENTAL_USE_VENUM}")
+message(STATUS "")
