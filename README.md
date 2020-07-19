@@ -57,13 +57,13 @@ Building on target with GCC will not be as performant as when cross compiling wi
 
 The easiest approach is to mount a fixed up rootfs on your host machine, and point TARGET_SYSROOT to it.  This is after you install the required packages, copy sysroot, and fixup the symlinks.
 
-## Measured Ninja Build Times
+## Measured Build Times
 
-time|48 core @ 1Gbps Internet|16 core @ 48Mbps Internet
--|-|-
-|real|5m41.664s|9m57.577s
-|user|17m0.860s|27m4.504s
-|sys|0m18.386s|0m30.169s
+Config|48 core @ 1Gbps Internet (Ninja)|16 core @ 48Mbps Internet (Ninja)|RPI3 @ 1Gbps Internet (Uniproc Make)
+-|-|-|-
+|real|5m41.664s|9m57.577s|402m3.774s
+|user|17m0.860s|27m4.504s|388m5.277s
+|sys|0m18.386s|0m30.169s|14m30.165s
 
 ## Enviromental variables
 
@@ -90,9 +90,13 @@ Point to base folder of your cross compiling capable LLVM toolchain
 
 Point to base folder of your target sysroot
 
-#### PKG_CONFIG_PATH
+#### TARGET_SYSROOT_TRIPLE
 
-This is used by OpenCV to find gtk-2.0 libraries.  The values used are based on a Debian arm-linux-eabihf rootfs.
+Defaults to `arm-linux-gnueabihf` if not set.  CMake variable of same name can be overriden if clang.toolchain.cmake is not used.
+
+#### PKG_CONFIG_PATH, PKG_CONFIG_LIBDIR
+
+These are used by OpenCV to find gtk-2.0, gtk-ext1, and openGL libraries in the target sysroot.
 
 ## CMake Variables
 
@@ -116,21 +120,55 @@ Defaults to `openvx_1.3`
 
 Defaults to `master`
 
-### BUILD_OPENCV_WITH_CPU_VFPV3
+### BUILD_OPENVX_TUTORIAL
 
-*Not required to be set when using optimized toolchain file*
+Builds the openvx_tutorial repo.  Defaults to ON
 
-Build OpenCV with VFPV3 tuning.  Defaults to OFF
+### BUILD_OPENCV_V4L2
 
-### BUILD_OPENCV_WITH_CPU_NEON
-
-*Not required to be set when using optimized toolchain file*
-
-Build OpenCV with Neon tuning.  Defaults to OFF
+Builds the opencv_v4l2 repo.  Defaults to ON
 
 ### BUILD_OPENCV_WITH_NONFREE
 
 Build OpenCV with Non-Free Support.  Defaults to ON
+
+### BUILD_OPENCV_WITH_QT
+
+Build OpenCV with QT.  Defaults to OFF
+
+### BUILD_OPENCV_WITH_GTK
+
+Build OpenCV with GTK.  Defaults to ON
+
+### BUILD_OPENCV_WITH_GTK_2_X
+
+Build OpenCV with GTK_2_X.  Defaults to ON
+
+### BUILD_OPENCV_WITH_OPENGL
+
+Build OpenCV with OpenGL.  Defaults to ON
+
+### BUILD_OPENCV_WITH_OPENVX
+
+Build OpenCV with OpenVX.  Defaults to ON
+
+### BUILD_OPENCV_WITH_TENGINE
+
+Build OpenCV with TEngine.  Defaults to OFF
+
+*Note: this requires a change to the TENGINE repo.  Toolchain tuning should be isolated to a toolchain file.*
+
+File to change:  `build/opencv-prefix/src/opencv-build/3rdparty/libtengine/Tengine-<commit>/CMakeLists.txt`
+
+Comment out as below.
+
+    if(CONFIG_ARCH_ARM32)
+        add_definitions(-DCONFIG_ARCH_ARM32=1)
+    #    if(NOT ANDROID)
+    #           add_definitions(-march=armv7-a -mfpu=neon -mfp16-format=ieee -mfpu=neon-fp16)
+    #           set(ARCH_TYPE,"Arm32")
+    #    endif()
+    endif()
 
 ### BUILD_OPENCV_WITH_VULKAN
 
@@ -138,15 +176,27 @@ Build OpenCV with Vulkan Support.  Defaults to OFF
 
 ### BUILD_OPENCV_WITH_TESTS
 
-Build/Install OpenCV with Tests.  Defaults to OFF
+Build OpenCV with Tests.  Defaults to OFF
 
 ### BUILD_OPENCV_WITH_EXAMPLES
 
-Build/Install OpenCV with Examples.  Defaults to OFF
+Build OpenCV with Examples.  Defaults to OFF
 
 ### BUILD_OPENCV_WITH_PYTHON_EXAMPLES
 
-Build/Install OpenCV with Python Examples.  Defaults to OFF
+Install Python Examples with OpenCV build.  Defaults to OFF
+
+### BUILD_OPENCV_WITH_CPU_VFPV3
+
+Builds OpenCV with -mfpu=vfpv3.  Defaults to OFF
+
+*Use with GCC or when using a Generic Triple with Clang*
+
+### BUILD_OPENCV_WITH_CPU_NEON
+
+Builds OpenCV with -mfpu=neon.  Defaults to OFF
+
+*Use with GCC or when using a Generic Triple with Clang*
 
 ### OPENVX_EXPERIMENTAL_USE_VENUM
 
@@ -167,9 +217,9 @@ You may need to set this when *not* using clang.toolchain.cmake.
 
 ## OpenCV Tests
 
-    Enable OpenCV tests by setting BUILD_OPENCV_WITH_TESTS=ON
+Enable OpenCV tests by setting BUILD_OPENCV_WITH_TESTS=ON
 
-    OpenCV tests were implemented with CTest, and paths are setup to run form the build folder.  When cross compiling there is a minor change to run them.
+OpenCV tests were implemented with CTest, and paths are setup to run form the build folder.  When cross compiling there is a minor change to run them.
 
 ### Running tests
 
@@ -200,3 +250,8 @@ You may need to set this when *not* using clang.toolchain.cmake.
     Note: The 8190 disabled tests are optional and are not considered for conformance.
     
     #REPORT: 20200717095309 ALL 16271 8190 6784 6784 6784 0 (version 1.3)
+
+### Performance
+
+The lowest latency I have seen with OpenCV and the Raspberry PI HQ camera is the access pattern used by "opencv-v4l2-gl-display".
+

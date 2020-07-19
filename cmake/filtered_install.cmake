@@ -116,27 +116,6 @@ install(FILES
 
 install(FILES
 
-    ${EXT_CMAKE_STAGING_PREFIX}/share/licenses/opencv4/ade-LICENSE
-    ${EXT_CMAKE_STAGING_PREFIX}/share/licenses/opencv4/ittnotify-LICENSE.BSD
-    ${EXT_CMAKE_STAGING_PREFIX}/share/licenses/opencv4/ittnotify-LICENSE.GPL
-    ${EXT_CMAKE_STAGING_PREFIX}/share/licenses/opencv4/jasper-copyright
-    ${EXT_CMAKE_STAGING_PREFIX}/share/licenses/opencv4/jasper-LICENSE
-    ${EXT_CMAKE_STAGING_PREFIX}/share/licenses/opencv4/jasper-README
-    ${EXT_CMAKE_STAGING_PREFIX}/share/licenses/opencv4/libjpeg-turbo-LICENSE.md
-    ${EXT_CMAKE_STAGING_PREFIX}/share/licenses/opencv4/libjpeg-turbo-README.ijg
-    ${EXT_CMAKE_STAGING_PREFIX}/share/licenses/opencv4/libjpeg-turbo-README.md
-    ${EXT_CMAKE_STAGING_PREFIX}/share/licenses/opencv4/libtiff-COPYRIGHT
-    ${EXT_CMAKE_STAGING_PREFIX}/share/licenses/opencv4/opencl-headers-LICENSE.txt
-    ${EXT_CMAKE_STAGING_PREFIX}/share/licenses/opencv4/protobuf-LICENSE
-    ${EXT_CMAKE_STAGING_PREFIX}/share/licenses/opencv4/protobuf-README.md
-    ${EXT_CMAKE_STAGING_PREFIX}/share/licenses/opencv4/quirc-LICENSE
-    ${EXT_CMAKE_STAGING_PREFIX}/share/licenses/opencv4/SoftFloat-COPYING.txt
-
-    DESTINATION share/licenses/opencv4
-)
-
-install(FILES
-
     ${EXT_CMAKE_STAGING_PREFIX}/share/opencv4/haarcascades/haarcascade_eye_tree_eyeglasses.xml
     ${EXT_CMAKE_STAGING_PREFIX}/share/opencv4/haarcascades/haarcascade_eye.xml
     ${EXT_CMAKE_STAGING_PREFIX}/share/opencv4/haarcascades/haarcascade_frontalcatface_extended.xml
@@ -489,4 +468,89 @@ if(BUILD_OPENCV_WITH_EXAMPLES)
 
         COMPONENT example
     )
+endif()
+
+if(BUILD_OPENVX_TUTORIAL)
+
+    install(FILES
+
+        ${EXT_CMAKE_STAGING_PREFIX}/lib/libvxa.so
+
+        DESTINATION lib${INSTALL_TRIPLE_SUFFIX}
+    )
+
+    set(OPENVX_BOOK_SAMPLES_BUILD ${CMAKE_BINARY_DIR}/openvx-book_samples-prefix/src/openvx-book_samples-build)
+
+    install(PROGRAMS
+
+        ${OPENVX_BOOK_SAMPLES_BUILD}/example1/example1
+        ${OPENVX_BOOK_SAMPLES_BUILD}/example2/example2
+        ${OPENVX_BOOK_SAMPLES_BUILD}/example3/example3
+        ${OPENVX_BOOK_SAMPLES_BUILD}/example4/changeImage
+        ${OPENVX_BOOK_SAMPLES_BUILD}/example4/example4
+        ${OPENVX_BOOK_SAMPLES_BUILD}/example4/example4a
+
+        ${OPENVX_BOOK_SAMPLES_BUILD}/filter/filterImage
+        ${OPENVX_BOOK_SAMPLES_BUILD}/filter/filterImageROI
+        ${OPENVX_BOOK_SAMPLES_BUILD}/filter/filterImageROIvxu
+
+        ${OPENVX_BOOK_SAMPLES_BUILD}/hough/hough
+        ${OPENVX_BOOK_SAMPLES_BUILD}/hough/houghEx
+
+        ${OPENVX_BOOK_SAMPLES_BUILD}/stitch/homography
+        ${OPENVX_BOOK_SAMPLES_BUILD}/stitch/homography-multiband
+
+        ${OPENVX_BOOK_SAMPLES_BUILD}/stitch/stitch
+        ${OPENVX_BOOK_SAMPLES_BUILD}/stitch/stitch-debug
+        ${OPENVX_BOOK_SAMPLES_BUILD}/stitch/stitch-multiband
+
+        ${OPENVX_BOOK_SAMPLES_BUILD}/tracking/tracking_example
+
+        ${OPENVX_BOOK_SAMPLES_BUILD}/undistort/undistort
+        ${OPENVX_BOOK_SAMPLES_BUILD}/undistort/undistortOpenCV
+
+        DESTINATION share/openvx/book
+    )
+
+    set(OPENVX_TUTORIAL_SAMPLES_BUILD ${CMAKE_BINARY_DIR}/openvx-tutorial_exercises-prefix/src/openvx-tutorial_exercises-build)
+
+    install(PROGRAMS
+
+        ${OPENVX_TUTORIAL_SAMPLES_BUILD}/exercise1/exercise1
+        ${OPENVX_TUTORIAL_SAMPLES_BUILD}/exercise2/exercise2
+        ${OPENVX_TUTORIAL_SAMPLES_BUILD}/solution_exercise1/solution_exercise1
+        ${OPENVX_TUTORIAL_SAMPLES_BUILD}/solution_exercise2/solution_exercise2
+
+        DESTINATION share/openvx/tutorials
+    )
+
+endif()
+
+if(BUILD_OPENCV_V4L2)
+
+    install(FILES
+
+        ${EXT_CMAKE_STAGING_PREFIX}/lib/libv4l2_helper.so
+        ${EXT_CMAKE_STAGING_PREFIX}/lib/libv4l2_helper.so.0.1
+        ${EXT_CMAKE_STAGING_PREFIX}/lib/libv4l2_helper.so.0.1.0
+
+        DESTINATION lib${INSTALL_TRIPLE_SUFFIX}
+    )
+
+    install(PROGRAMS
+
+        ${EXT_CMAKE_STAGING_PREFIX}/bin/opencv-main
+        ${EXT_CMAKE_STAGING_PREFIX}/bin/opencv-v4l2
+        ${EXT_CMAKE_STAGING_PREFIX}/bin/opencv_version
+        ${EXT_CMAKE_STAGING_PREFIX}/bin/opencv-main-display
+        ${EXT_CMAKE_STAGING_PREFIX}/bin/opencv-v4l2-display
+        ${EXT_CMAKE_STAGING_PREFIX}/bin/opencv_visualisation
+        ${EXT_CMAKE_STAGING_PREFIX}/bin/opencv-main-gl-display
+        ${EXT_CMAKE_STAGING_PREFIX}/bin/opencv-v4l2-gl-display
+        ${EXT_CMAKE_STAGING_PREFIX}/bin/opencv-main-gpu-display
+        ${EXT_CMAKE_STAGING_PREFIX}/bin/opencv-v4l2-gpu-display
+
+        DESTINATION bin
+    )
+
 endif()

@@ -27,6 +27,13 @@ include_guard()
 SET(CMAKE_SYSTEM_VERSION 1)
 SET(CMAKE_SYSTEM_NAME Linux)
 
+# Enviromental Variables
+if(NOT DEFINED ENV{TARGET_SYSROOT_TRIPLE})
+    set(TARGET_SYSROOT_TRIPLE arm-linux-gnueabihf)
+else()
+    set(TARGET_SYSROOT_TRIPLE ENV{TARGET_SYSROOT_TRIPLE})
+endif()
+
 if(NOT DEFINED ENV{TARGET_SYSROOT})
     MESSAGE(FATAL_ERROR "Set enviromental variable TARGET_SYSROOT to base path of the target sysroot")
 endif()
@@ -65,18 +72,30 @@ if(${MACHINE} STREQUAL "raspberrypi2" OR
 
     endif()
 
-    SET(GCC_LIB_PATH ${TARGET_SYSROOT}/usr/lib/gcc/arm-linux-gnueabihf/8)
+    SET(GCC_LIB_PATH ${TARGET_SYSROOT}/usr/lib/gcc/${TARGET_SYSROOT_TRIPLE}/8)
     SET(CLANG_LIB_PATH ${LLVM_ROOT}/lib/clang/8.0.0/armv7-linux-gnueabihf/lib)
 
     SET(PACKAGE_ARCH armhf) # must match target or deb package will not install
 
-    SET(ENV{PKG_CONFIG_PATH} ${TARGET_SYSROOT}/usr/lib/arm-linux-gnueabihf/pkgconfig:${TARGET_SYSROOT}/usr/share/pkgconfig)
+    SET(PKG_CONFIG_PATH "${TARGET_SYSROOT}/usr/lib/${TARGET_SYSROOT_TRIPLE}/pkgconfig")
+    STRING(APPEND PKG_CONFIG_PATH ":${TARGET_SYSROOT}/usr/share/pkgconfig")
+    STRING(APPEND PKG_CONFIG_PATH ":${TARGET_SYSROOT}/opt/vc/lib/pkgconfig")
+
+    SET(ENV{PKG_CONFIG_PATH}   ${PKG_CONFIG_PATH})
+    SET(ENV{PKG_CONFIG_LIBDIR} ${PKG_CONFIG_PATH})
+    
+    MESSAGE(STATUS "export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}")
+    MESSAGE(STATUS "export PKG_CONFIG_LIBDIR=${PKG_CONFIG_PATH}")
+
+elseif(${MACHINE} STREQUAL "raspberrypi3-64" OR ${MACHINE} STREQUAL "raspberrypi4-64")
+
+    MESSAGE(FATAL_ERROR "aarch64 not implemented yet")
 
 endif()
 
+SET(CMAKE_C_COMPILER_TARGET ${CLANG_TARGET})
 SET(CMAKE_ASM_COMPILER_TARGET ${CLANG_TARGET})
 SET(CMAKE_CXX_COMPILER_TARGET ${CLANG_TARGET})
-SET(CMAKE_C_COMPILER_TARGET ${CLANG_TARGET})
 
 SET(CLANG_C_FLAGS    " -stdlib=libstdc++ -flto -fuse-ld=lld -Wno-unused-command-line-argument")
 SET(CLANG_LINK_FLAGS " -stdlib=libstdc++ -fuse-ld=lld -rtlib=compiler-rt")
@@ -91,8 +110,8 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 # compiler
-SET(CMAKE_ASM_COMPILER ${LLVM_ROOT}/bin/clang)
 SET(CMAKE_C_COMPILER ${LLVM_ROOT}/bin/clang)
+SET(CMAKE_ASM_COMPILER ${LLVM_ROOT}/bin/clang)
 SET(CMAKE_CXX_COMPILER ${LLVM_ROOT}/bin/clang++)
 
 SET(CMAKE_AR ${LLVM_ROOT}/bin/llvm-ar)
@@ -103,31 +122,34 @@ SET(CMAKE_OBJCOPY ${LLVM_ROOT}/bin/llvm-objcopy)
 SET(CMAKE_OBJDUMP ${LLVM_ROOT}/bin/llvm-objdump)
 
 # compiler flags
-#SET(CLANG_SANITIZE " -fsanitize=address")
-#SET(CLANG_SANITIZE " -fsanitize=thread")
-#SET(CLANG_SANITIZE " -fsanitize=memory")
-#SET(CLANG_SANITIZE " -fsanitize=undefined")
-#SET(CLANG_SANITIZE " -fsanitize=dataflow")
-#SET(CLANG_SANITIZE " -fsanitize=cfi") # requires -flto
-#SET(CLANG_SANITIZE " -fsanitize=safe-stack")
-#SET(CLANG_SANITIZE " -fsanitize-recover=alignment -fno-sanitize-trap=alignment")
+#SET(CLANG_SANITIZE "-fsanitize=address")
+#SET(CLANG_SANITIZE "-fsanitize=thread")
+#SET(CLANG_SANITIZE "-fsanitize=memory")
+#SET(CLANG_SANITIZE "-fsanitize=undefined")
+#SET(CLANG_SANITIZE "-fsanitize=dataflow")
+#SET(CLANG_SANITIZE "-fsanitize=cfi") # requires -flto
+#SET(CLANG_SANITIZE "-fsanitize=safe-stack")
+#SET(CLANG_SANITIZE "-fsanitize-recover=alignment -fno-sanitize-trap=alignment")
 STRING(APPEND CMAKE_C_FLAGS ${CLANG_SANITIZE})
 
-STRING(APPEND CMAKE_C_FLAGS "${CLANG_C_FLAGS} -Wl,-L${GCC_LIB_PATH} -Wl,-L${CLANG_LIB_PATH}")
+STRING(APPEND CMAKE_C_FLAGS " ${CLANG_C_FLAGS} -Wl,-L${GCC_LIB_PATH} -Wl,-L${CLANG_LIB_PATH}")
 
-# OpenCV gtk-2.0 workaround -> OpenCV doesn't use pkcfg correctly
-STRING(APPEND CMAKE_C_FLAGS " -I${TARGET_SYSROOT}/usr/include/gtk-2.0")
-STRING(APPEND CMAKE_C_FLAGS " -I${TARGET_SYSROOT}/usr/lib/arm-linux-gnueabihf/gtk-2.0/include")
-STRING(APPEND CMAKE_C_FLAGS " -I${TARGET_SYSROOT}/usr/lib/arm-linux-gnueabihf/glib-2.0/include")
+# OpenCV workarounds
+STRING(APPEND CMAKE_C_FLAGS " -I${TARGET_SYSROOT}/usr/include")
+STRING(APPEND CMAKE_C_FLAGS " -I${TARGET_SYSROOT}/usr/include/atk-1.0")
 STRING(APPEND CMAKE_C_FLAGS " -I${TARGET_SYSROOT}/usr/include/cairo")
 STRING(APPEND CMAKE_C_FLAGS " -I${TARGET_SYSROOT}/usr/include/pango-1.0")
 STRING(APPEND CMAKE_C_FLAGS " -I${TARGET_SYSROOT}/usr/include/gdk-pixbuf-2.0")
-STRING(APPEND CMAKE_C_FLAGS " -I${TARGET_SYSROOT}/usr/include/atk-1.0")
+STRING(APPEND CMAKE_C_FLAGS " -I${TARGET_SYSROOT}/usr/include/gtk-2.0")
+STRING(APPEND CMAKE_C_FLAGS " -I${TARGET_SYSROOT}/usr/include/gtkglext-1.0")
+STRING(APPEND CMAKE_C_FLAGS " -I${TARGET_SYSROOT}/usr/lib/${TARGET_SYSROOT_TRIPLE}/gtk-2.0/include")
+STRING(APPEND CMAKE_C_FLAGS " -I${TARGET_SYSROOT}/usr/lib/${TARGET_SYSROOT_TRIPLE}/glib-2.0/include")
+STRING(APPEND CMAKE_C_FLAGS " -I${TARGET_SYSROOT}/usr/lib/${TARGET_SYSROOT_TRIPLE}/gtkglext-1.0/include")
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -I${CLANG_CXX_INC}")
 
 SET(CMAKE_SHARED_LINKER_FLAGS "${CLANG_LINK_FLAGS} ${CLANG_SANITIZE}")
-SET(CMAKE_EXE_LINKER_FLAGS    "${CLANG_LINK_FLAGS} ${GCC_STATIC_UNWIND} ${CLANG_SANITIZE}")
+SET(CMAKE_EXE_LINKER_FLAGS    "${CLANG_LINK_FLAGS} ${CLANG_SANITIZE} ${GCC_STATIC_UNWIND}")
 
 # packaging variables
 set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
