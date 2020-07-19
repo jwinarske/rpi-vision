@@ -57,13 +57,13 @@ Building on target with GCC will not be as performant as when cross compiling wi
 
 The easiest approach is to mount a fixed up rootfs on your host machine, and point TARGET_SYSROOT to it.  This is after you install the required packages, copy sysroot, and fixup the symlinks.
 
-## Measured Ninja Build Times
+## Measured Build Times
 
-time|48 core @ 1Gbps Internet|16 core @ 48Mbps Internet
--|-|-
-|real|5m41.664s|9m57.577s
-|user|17m0.860s|27m4.504s
-|sys|0m18.386s|0m30.169s
+Config|48 core @ 1Gbps Internet (Ninja)|16 core @ 48Mbps Internet (Ninja)|RPI3 @ 1Gbps Internet (Uniproc Make)
+-|-|-|-
+|real|5m41.664s|9m57.577s|402m3.774s
+|user|17m0.860s|27m4.504s|388m5.277s
+|sys|0m18.386s|0m30.169s|14m30.165s
 
 ## Enviromental variables
 
@@ -89,6 +89,10 @@ Point to base folder of your cross compiling capable LLVM toolchain
 *Required with clang.toolchain.cmake*
 
 Point to base folder of your target sysroot
+
+#### TARGET_SYSROOT_TRIPLE
+
+Defaults to `arm-linux-gnueabihf` if not set.  CMake variable of same name can be overriden if clang.toolchain.cmake is not used.
 
 #### PKG_CONFIG_PATH
 

@@ -27,6 +27,13 @@ include_guard()
 SET(CMAKE_SYSTEM_VERSION 1)
 SET(CMAKE_SYSTEM_NAME Linux)
 
+# Enviromental Variables
+if(NOT DEFINED ENV{TARGET_SYSROOT_TRIPLE})
+    set(TARGET_SYSROOT_TRIPLE arm-linux-gnueabihf)
+else()
+    set(TARGET_SYSROOT_TRIPLE ENV{TARGET_SYSROOT_TRIPLE})
+endif()
+
 if(NOT DEFINED ENV{TARGET_SYSROOT})
     MESSAGE(FATAL_ERROR "Set enviromental variable TARGET_SYSROOT to base path of the target sysroot")
 endif()
@@ -65,12 +72,16 @@ if(${MACHINE} STREQUAL "raspberrypi2" OR
 
     endif()
 
-    SET(GCC_LIB_PATH ${TARGET_SYSROOT}/usr/lib/gcc/arm-linux-gnueabihf/8)
+    SET(GCC_LIB_PATH ${TARGET_SYSROOT}/usr/lib/gcc/${TARGET_SYSROOT_TRIPLE}/8)
     SET(CLANG_LIB_PATH ${LLVM_ROOT}/lib/clang/8.0.0/armv7-linux-gnueabihf/lib)
 
     SET(PACKAGE_ARCH armhf) # must match target or deb package will not install
 
-    SET(ENV{PKG_CONFIG_PATH} ${TARGET_SYSROOT}/usr/lib/arm-linux-gnueabihf/pkgconfig:${TARGET_SYSROOT}/usr/share/pkgconfig)
+    SET(ENV{PKG_CONFIG_PATH} ${TARGET_SYSROOT}/usr/lib/${TARGET_SYSROOT_TRIPLE}/pkgconfig:${TARGET_SYSROOT}/usr/share/pkgconfig)
+
+elseif(${MACHINE} STREQUAL "raspberrypi3-64" OR ${MACHINE} STREQUAL "raspberrypi4-64")
+
+    MESSAGE(FATAL_ERROR "aarch64 not implemented yet")
 
 endif()
 
@@ -113,12 +124,12 @@ SET(CMAKE_OBJDUMP ${LLVM_ROOT}/bin/llvm-objdump)
 #SET(CLANG_SANITIZE " -fsanitize-recover=alignment -fno-sanitize-trap=alignment")
 STRING(APPEND CMAKE_C_FLAGS ${CLANG_SANITIZE})
 
-STRING(APPEND CMAKE_C_FLAGS "${CLANG_C_FLAGS} -Wl,-L${GCC_LIB_PATH} -Wl,-L${CLANG_LIB_PATH}")
+STRING(APPEND CMAKE_C_FLAGS " ${CLANG_C_FLAGS} -Wl,-L${GCC_LIB_PATH} -Wl,-L${CLANG_LIB_PATH}")
 
 # OpenCV gtk-2.0 workaround -> OpenCV doesn't use pkcfg correctly
 STRING(APPEND CMAKE_C_FLAGS " -I${TARGET_SYSROOT}/usr/include/gtk-2.0")
-STRING(APPEND CMAKE_C_FLAGS " -I${TARGET_SYSROOT}/usr/lib/arm-linux-gnueabihf/gtk-2.0/include")
-STRING(APPEND CMAKE_C_FLAGS " -I${TARGET_SYSROOT}/usr/lib/arm-linux-gnueabihf/glib-2.0/include")
+STRING(APPEND CMAKE_C_FLAGS " -I${TARGET_SYSROOT}/usr/lib/${TARGET_SYSROOT_TRIPLE}/gtk-2.0/include")
+STRING(APPEND CMAKE_C_FLAGS " -I${TARGET_SYSROOT}/usr/lib/${TARGET_SYSROOT_TRIPLE}/glib-2.0/include")
 STRING(APPEND CMAKE_C_FLAGS " -I${TARGET_SYSROOT}/usr/include/cairo")
 STRING(APPEND CMAKE_C_FLAGS " -I${TARGET_SYSROOT}/usr/include/pango-1.0")
 STRING(APPEND CMAKE_C_FLAGS " -I${TARGET_SYSROOT}/usr/include/gdk-pixbuf-2.0")
