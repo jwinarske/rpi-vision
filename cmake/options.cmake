@@ -34,6 +34,10 @@ if(NOT OPENVX_SAMPLES_GIT_TAG)
     set(OPENVX_SAMPLES_GIT_TAG master)
 endif()
 
+if(NOT OPENVX_TUTORIALS_GIT_TAG)
+    set(OPENVX_TUTORIALS_GIT_TAG master)
+endif()
+
 # Applies to GCC ARM, or when using a Generic Triple with Clang
 option(BUILD_OPENCV_WITH_CPU_VFPV3 "Builds OpenCV with -mfpu=vfpv3" OFF)
 option(BUILD_OPENCV_WITH_CPU_NEON "Builds OpenCV with -mfpu=neon" OFF)
