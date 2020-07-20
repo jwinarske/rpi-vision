@@ -104,7 +104,7 @@ ExternalProject_Add(vxa
      -DCMAKE_INSTALL_RPATH=${CMAKE_INSTALL_PREFIX}/bin${INSTALL_TRIPLE_SUFFIX}|${CMAKE_INSTALL_PREFIX}/lib${INSTALL_TRIPLE_SUFFIX}
      ${VXA_ANDROID_ARGS}
 )
-add_dependencies(vxa openvx-impl)
+add_dependencies(vxa openvx-impl opencv)
 
 ExternalProject_Add(openvx-cts
     DOWNLOAD_COMMAND ""
